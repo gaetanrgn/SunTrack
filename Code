@@ -1,0 +1,250 @@
+//www.elegoo.com
+//2016.12.9
+#include <Servo.h>
+#include <SimpleDHT.h>
+#include <LiquidCrystal.h>
+int tempPin = 4;
+//                BS  E  D4 D5  D6 D7
+LiquidCrystal lcd(7, 8, 9, 10, 11, 12);
+
+int pinDHT11 = 2;
+SimpleDHT11 dht11;
+
+
+
+Servo myservohorizon;  // create servo object to control a servo
+Servo myservovertical; //Def servo2
+int pos = 0;    // variable to store the servo position
+  int sensorMin = 1023;        // minimum sensor value
+  int sensorMax = 0;           // maximum sensor value
+  int sensorValue = 0;
+
+  int sensorMin2 = 1023;        // minimum sensor value
+  int sensorMax2 = 0;           // maximum sensor value
+  int sensorValue2 = 0;
+  
+
+void setup()
+{
+  Serial.begin(9600);
+  lcd.begin(16, 2);
+
+
+  Serial.begin(9600);
+  myservohorizon.attach(6); // Relie le pin 8 au servomoteur2
+  myservovertical.attach(5);  // attaches the servo on pin 9 to the servo object
+  
+
+  
+  int pos_servohorizon;
+  int pos_servovertical;
+  
+}
+void loop()
+{
+  
+  ServoMoteurs();
+}
+
+
+void ServoMoteurs()
+{
+  myservohorizon.write(90);
+  int precision = 100;/*
+  // calibrate during the first five seconds 
+  int sensorPin1 = A0;
+  while (millis() < 5000) {
+   sensorValue = analogRead(sensorPin1);
+
+   // record the maximum sensor value
+   if (sensorValue > sensorMax) {
+     sensorMax = sensorValue;
+   }
+
+   // record the minimum sensor value
+   if (sensorValue < sensorMin) {
+     sensorMin = sensorValue;
+   }
+ }
+   Serial.println("max value sensor 1 :");
+   Serial.println(sensorMax);
+   Serial.println("min value sensor 1 :");
+   Serial.println(sensorMin);
+   Serial.println("*****************");
+ // calibrate 2 during the first five seconds 
+   int sensorPin2 = A1;
+   
+   for (int k=0;k<5000;k++) {
+   sensorValue2 = analogRead(sensorPin2);
+   // record the maximum sensor value
+   if (sensorValue2 > sensorMax2) {
+     sensorMax2 = sensorValue2;
+   }
+
+   // record the minimum sensor value
+   if (sensorValue2 < sensorMin2) {
+     sensorMin2 = sensorValue2;
+   }
+   delay(1);
+ }
+ 
+   Serial.println("max value sensor 2 :");
+   Serial.println(sensorMax2);
+   Serial.println("min value sensor 2 :");
+   Serial.println(sensorMin2);
+   */
+
+ 
+  //VALEUR PHOTO SENSOR
+  int valeur_photosensor1 = analogRead(A0);
+  Serial.println(valeur_photosensor1);
+  int valeur_photosensor2 = analogRead(A1);
+  Serial.println(valeur_photosensor2);
+  //delay(4000);
+  int valeur_photosensor3 = analogRead(A2);
+  Serial.println(valeur_photosensor3);
+  int valeur_photosensor4 = analogRead(A3);
+  Serial.println(valeur_photosensor4);
+  //delay(4000);
+
+  /*valeur_photosensor1 = analogRead(A0);
+  Serial.println(valeur_photosensor1);
+  valeur_photosensor2 = analogRead(A1);
+  Serial.println(valeur_photosensor2);
+  delay(4000);
+
+  valeur_photosensor1 = analogRead(A0);
+  Serial.println(valeur_photosensor1);
+  valeur_photosensor2 = analogRead(A1);
+  Serial.println(valeur_photosensor2);
+  delay(4000);*/
+
+  //int position=myservohorizon.read();
+  for (int k=0;k<100000;k++)
+  {
+
+    TempetLCD();
+  CapteurTempHumDht11();
+    
+    valeur_photosensor1 = analogRead(A0);
+    valeur_photosensor2 = analogRead(A1);
+    valeur_photosensor3 = analogRead(A2);
+    valeur_photosensor4 = analogRead(A3);
+
+    if (valeur_photosensor3>valeur_photosensor4)
+      {
+        for (int pos=myservovertical.read();(pos<180) && ((valeur_photosensor3>valeur_photosensor4)|| ((valeur_photosensor4-valeur_photosensor3 > precision) || (valeur_photosensor3-valeur_photosensor4 > precision)));)
+        {
+          /*valeur_photosensor3 = analogRead(A2);
+          valeur_photosensor4 = analogRead(A3);*/
+          if ((valeur_photosensor4-valeur_photosensor3 > precision) || (valeur_photosensor3-valeur_photosensor4 > precision))
+          {myservovertical.write(pos);
+          pos++;}
+          valeur_photosensor3 = analogRead(A2);
+          valeur_photosensor4 = analogRead(A3);
+          delay(20);
+        }
+      }
+       if (valeur_photosensor3<valeur_photosensor4 )
+        {
+        for (int pos=myservovertical.read();(pos>0) && ((valeur_photosensor3<valeur_photosensor4) || ((valeur_photosensor4-valeur_photosensor3 > precision) || (valeur_photosensor3-valeur_photosensor4 > precision)));)
+        {
+          /*valeur_photosensor3 = analogRead(A2);
+          valeur_photosensor4 = analogRead(A3);*/
+          if ((valeur_photosensor4-valeur_photosensor3 > precision) || (valeur_photosensor3-valeur_photosensor4 > precision))
+          {myservovertical.write(pos);
+          pos--;}
+          valeur_photosensor3 = analogRead(A2);
+          valeur_photosensor4 = analogRead(A3);
+          delay(20);
+        }
+        }
+    
+      if (valeur_photosensor1>valeur_photosensor2)
+      {
+        for (int pos=myservohorizon.read();(pos<180) && ((valeur_photosensor1>valeur_photosensor2) || ((valeur_photosensor2-valeur_photosensor1 > precision) || (valeur_photosensor1-valeur_photosensor2 > precision)));)
+        {
+          /*valeur_photosensor1 = analogRead(A0);
+          valeur_photosensor2 = analogRead(A1);*/
+          if ((valeur_photosensor2-valeur_photosensor1 > precision) || (valeur_photosensor1-valeur_photosensor2 > precision))
+          {myservohorizon.write(pos);
+          pos++;}
+          valeur_photosensor1 = analogRead(A0);
+          valeur_photosensor2 = analogRead(A1);
+          delay(20);
+        }
+      }
+        if (valeur_photosensor1<valeur_photosensor2)
+        {
+        for (int pos=myservohorizon.read();(pos>0) && ((valeur_photosensor1<valeur_photosensor2) || ((valeur_photosensor2-valeur_photosensor1 > precision) || (valeur_photosensor1-valeur_photosensor2 > precision)));)
+        {
+          /*valeur_photosensor1 = analogRead(A0);
+          valeur_photosensor2 = analogRead(A1);*/
+          if ((valeur_photosensor2-valeur_photosensor1 > precision) || (valeur_photosensor1-valeur_photosensor2 > precision))
+          {myservohorizon.write(pos);
+          pos--;}
+          valeur_photosensor1 = analogRead(A0);
+          valeur_photosensor2 = analogRead(A1);
+          delay(20);
+        }
+        }
+    }
+    delay(20);
+}
+
+void TempetLCD()
+{
+    int tempReading = analogRead(tempPin);
+  double tempK = log(10000.0 * ((1024.0 / tempReading - 1)));
+  tempK = 1 / (0.001129148 + (0.000234125 + (0.0000000876741 * tempK * tempK )) * tempK );       //  Temp Kelvin
+  float tempC = tempK - 273.15;            // Convertion Kelvin en Celcius
+  float tempF = (tempC * 9.0)/ 5.0 + 32.0; // Convertion Celcius en Fahrenheit
+
+  // Affiche Temperature en °C
+  lcd.setCursor(0, 0);
+  lcd.print("Temp         C  ");
+  lcd.setCursor(6, 0);
+  lcd.print(tempC);
+  // Affiche Temperature en F
+  lcd.setCursor(0, 1);
+  lcd.print("Temp         F  ");
+  lcd.setCursor(6, 1);
+  lcd.print(tempF);
+  delay(500);
+
+
+}
+
+void CapteurTempHumDht11()
+{
+  // start working...
+  Serial.println("=================================");
+  Serial.println("Sample DHT11...");
+  
+  // read with raw sample data.
+  byte temperature = 0;
+  byte humidity = 0;
+  byte data[40] = {0};
+  if (dht11.read(pinDHT11, &temperature, &humidity, data)) {
+    Serial.print("Read DHT11 failed");
+    return;
+  }
+  
+  Serial.print("RAW Bits recus : ");
+  for (int i = 0; i < 40; i++) {
+    Serial.print((int)data[i]);
+    if (i > 0 && ((i + 1) % 4) == 0) {
+      Serial.print(' ');
+    }
+  }
+  Serial.println("");
+  
+  Serial.print("Sample OK: ");
+  Serial.println ("La temperature est de : ");Serial.print((int)temperature); Serial.print(" *C, ");
+  Serial.println("");
+  Serial.println ("Le taux d'humidité est de : ");Serial.print((int)humidity); Serial.println(" %");
+  
+  // DHT11 sampling rate is 1HZ.
+  delay(1000);
+}
+
